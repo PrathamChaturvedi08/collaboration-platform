@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import { Link } from "react-router-dom";
 
 function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -75,7 +76,9 @@ function DashboardPage() {
       <h2>Your Workspaces</h2>
 
       {workspaces.map((workspace) => (
-        <div key={workspace._id}>{workspace.name}</div>
+        <div key={workspace._id}>
+          <Link to={`/workspace/${workspace._id}`}>{workspace.name}</Link>
+        </div>
       ))}
     </div>
   );
