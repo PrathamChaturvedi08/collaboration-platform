@@ -22,7 +22,9 @@ const getWorkspaces = async (req, res) => {
   try {
     const workspaces = await Workspace.find({
       members: req.user.userId,
-    });
+    })
+      .populate("owner", "name email")
+      .populate("members", "name email");
 
     res.json(workspaces);
   } catch (error) {
