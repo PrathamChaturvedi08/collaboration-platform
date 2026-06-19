@@ -1,5 +1,6 @@
 const Message = require("../models/Message");
 const Workspace = require("../models/Workspace");
+const { getIO } = require("../socket/socket");
 
 const sendMessage = async (req, res) => {
   try {
@@ -19,11 +20,15 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    const message = await Message.create({
+    let message = await Message.create({
       workspace: workspace._id,
       sender: req.user.userId,
       content: req.body.content,
     });
+
+    message = await message.populate("sender", "name email");
+
+    getIO().to(workspace._id.toString()).emit("new-message", message);
 
     res.status(201).json(message);
   } catch (error) {
