@@ -5,9 +5,9 @@ const createWorkspace = async (req, res) => {
     const workspace = await Workspace.create({
       name: req.body.name,
 
-      owner: req.user.userId,
+      owner: req.user._id,
 
-      members: [req.user.userId],
+      members: [req.user._id],
     });
 
     res.status(201).json(workspace);
@@ -21,7 +21,7 @@ const createWorkspace = async (req, res) => {
 const getWorkspaces = async (req, res) => {
   try {
     const workspaces = await Workspace.find({
-      members: req.user.userId,
+      members: req.user._id,
     })
       .populate("owner", "name email")
       .populate("members", "name email");
@@ -44,7 +44,7 @@ const joinWorkspace = async (req, res) => {
       });
     }
 
-    const alreadyMember = workspace.members.includes(req.user.userId);
+    const alreadyMember = workspace.members.includes(req.user._id);
 
     if (alreadyMember) {
       return res.status(400).json({
@@ -52,7 +52,7 @@ const joinWorkspace = async (req, res) => {
       });
     }
 
-    workspace.members.push(req.user.userId);
+    workspace.members.push(req.user._id);
 
     await workspace.save();
 
@@ -74,7 +74,7 @@ const deleteWorkspace = async (req, res) => {
       });
     }
 
-    if (workspace.owner.toString() !== req.user.userId) {
+    if (workspace.owner.toString() !== req.user._id) {
       return res.status(403).json({
         message: "Only owner can delete workspace",
       });
@@ -102,7 +102,7 @@ const updateWorkspace = async (req, res) => {
       });
     }
 
-    if (workspace.owner.toString() !== req.user.userId) {
+    if (workspace.owner.toString() !== req.user._id) {
       return res.status(403).json({
         message: "Only owner can update workspace",
       });

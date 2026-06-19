@@ -12,7 +12,7 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    const isMember = workspace.members.includes(req.user.userId);
+    const isMember = workspace.members.includes(req.user._id);
 
     if (!isMember) {
       return res.status(403).json({
@@ -22,7 +22,7 @@ const sendMessage = async (req, res) => {
 
     let message = await Message.create({
       workspace: workspace._id,
-      sender: req.user.userId,
+      sender: req.user._id,
       content: req.body.content,
     });
 
@@ -48,7 +48,7 @@ const getMessages = async (req, res) => {
       });
     }
 
-    const isMember = workspace.members.includes(req.user.userId);
+    const isMember = workspace.members.includes(req.user._id);
 
     if (!isMember) {
       return res.status(403).json({
