@@ -10,29 +10,18 @@ const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
+    console.log("User Connected:", socket.id);
 
-  console.log(
-    "User Connected:",
-    socket.id
-  );
+    socket.on("join-workspace", (workspaceId) => {
+      socket.join(workspaceId);
 
-  socket.on("join-workspace", (workspaceId) => {
+      console.log(`Socket ${socket.id} joined workspace ${workspaceId}`);
+    });
 
-    socket.join(workspaceId);
-
-    console.log(
-      `Socket ${socket.id} joined workspace ${workspaceId}`
-    );
+    socket.on("disconnect", () => {
+      console.log("User Disconnected:", socket.id);
+    });
   });
-
-  socket.on("disconnect", () => {
-
-    console.log(
-      "User Disconnected:",
-      socket.id
-    );
-  });
-});
 };
 
 const getIO = () => io;
