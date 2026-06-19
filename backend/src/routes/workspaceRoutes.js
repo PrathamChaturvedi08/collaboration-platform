@@ -2,10 +2,15 @@ const express = require("express");
 
 const router = express.Router();
 
-const { createWorkspace } = require("../controllers/workspaceController");
+const {
+  createWorkspace,
+  getWorkspaces,
+} = require("../controllers/workspaceController");
 
 const { protect } = require("../middleware/authMiddleware");
 
 router.post("/", protect, createWorkspace);
+
+router.get("/", protect, getWorkspaces);
 
 module.exports = router;
