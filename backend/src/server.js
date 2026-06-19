@@ -10,11 +10,15 @@ const http = require("http");
 
 const { initSocket } = require("./socket/socket");
 
+const cors = require("cors");
+
 dotenv.config();
 
 connectDB();
 
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 

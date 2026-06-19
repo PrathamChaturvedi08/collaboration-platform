@@ -22,10 +22,23 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
+    const token = jwt.sign(
+      {
+        userId: user._id,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
+
     res.status(201).json({
-      id: user._id,
-      name: user.name,
-      email: user.email,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -45,9 +58,6 @@ const loginUser = async (req, res) => {
         message: "Invalid credentials",
       });
     }
-
-    // console.log(req.body);
-    // console.log(user);
 
     if (!user.password) {
       return res.status(400).json({
