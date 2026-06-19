@@ -7,6 +7,10 @@ function DashboardPage() {
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaces, setWorkspaces] = useState([]);
   const [workspaceId, setWorkspaceId] = useState("");
+  const logout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
 
   const fetchWorkspaces = async () => {
     try {
@@ -72,6 +76,8 @@ function DashboardPage() {
       <h1>Welcome, {user.name}</h1>
 
       <p>{user.email}</p>
+
+      <button onClick={logout}>Logout</button>
 
       <hr />
 
