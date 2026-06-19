@@ -4,6 +4,17 @@ import api from "../services/api";
 function DashboardPage() {
   const [user, setUser] = useState(null);
   const [workspaceName, setWorkspaceName] = useState("");
+  const [workspaces, setWorkspaces] = useState([]);
+
+  const fetchWorkspaces = async () => {
+    try {
+      const res = await api.get("/workspaces");
+
+      setWorkspaces(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -17,6 +28,7 @@ function DashboardPage() {
     };
 
     fetchUser();
+    fetchWorkspaces();
   }, []);
 
   const createWorkspace = async () => {
@@ -28,6 +40,8 @@ function DashboardPage() {
       alert("Workspace created");
 
       setWorkspaceName("");
+
+      fetchWorkspaces();
     } catch (error) {
       console.error(error);
     }
@@ -55,6 +69,14 @@ function DashboardPage() {
       />
 
       <button onClick={createWorkspace}>Create</button>
+
+      <hr />
+
+      <h2>Your Workspaces</h2>
+
+      {workspaces.map((workspace) => (
+        <div key={workspace._id}>{workspace.name}</div>
+      ))}
     </div>
   );
 }
