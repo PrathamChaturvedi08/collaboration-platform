@@ -7,6 +7,22 @@ function WorkspacePage() {
 
   const [messages, setMessages] = useState([]);
 
+  const [content, setContent] = useState("");
+
+  const sendMessage = async () => {
+    try {
+      const res = await api.post(`/messages/${id}`, {
+        content,
+      });
+
+      setMessages([...messages, res.data]);
+
+      setContent("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -30,6 +46,17 @@ function WorkspacePage() {
       <hr />
 
       <h2>Messages</h2>
+
+      <input
+        type="text"
+        placeholder="Type a message"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+      />
+
+      <button onClick={sendMessage}>Send</button>
+
+      <hr />
 
       {messages.map((message) => (
         <div key={message._id}>
