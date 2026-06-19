@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   createWorkspace,
   getWorkspaces,
+  getWorkspaceById,
   joinWorkspace,
   deleteWorkspace,
   updateWorkspace,
@@ -15,6 +16,8 @@ const { protect } = require("../middleware/authMiddleware");
 router.post("/", protect, createWorkspace);
 
 router.get("/", protect, getWorkspaces);
+
+router.get("/:id", protect, getWorkspaceById);
 
 router.post("/:id/join", protect, joinWorkspace);
 
