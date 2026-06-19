@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
+import socket from "../services/socket";
 
 function WorkspacePage() {
   const { id } = useParams();
@@ -11,11 +12,9 @@ function WorkspacePage() {
 
   const sendMessage = async () => {
     try {
-      const res = await api.post(`/messages/${id}`, {
+      await api.post(`/messages/${id}`, {
         content,
       });
-
-      setMessages([...messages, res.data]);
 
       setContent("");
     } catch (error) {
@@ -35,6 +34,16 @@ function WorkspacePage() {
     };
 
     fetchMessages();
+
+    socket.emit("join-workspace", id);
+
+    socket.on("new-message", (message) => {
+      setMessages((prev) => [...prev, message]);
+    });
+
+    return () => {
+      socket.off("new-message");
+    };
   }, [id]);
 
   return (
