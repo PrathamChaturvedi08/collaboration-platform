@@ -88,7 +88,15 @@ const loginUser = async (req, res) => {
   }
 };
 
+const getMe = async (req, res) => {
+  res.json({
+    message: "Protected Route Accessed",
+    user: req.user,
+  });
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  getMe,
 };
