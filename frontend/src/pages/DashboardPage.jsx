@@ -6,6 +6,7 @@ function DashboardPage() {
   const [user, setUser] = useState(null);
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaces, setWorkspaces] = useState([]);
+  const [workspaceId, setWorkspaceId] = useState("");
 
   const fetchWorkspaces = async () => {
     try {
@@ -48,6 +49,20 @@ function DashboardPage() {
     }
   };
 
+  const joinWorkspace = async () => {
+    try {
+      await api.post(`/workspaces/${workspaceId}/join`);
+
+      alert("Joined workspace");
+
+      setWorkspaceId("");
+
+      fetchWorkspaces();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (!user) {
     return <h2>Loading...</h2>;
   }
@@ -72,6 +87,17 @@ function DashboardPage() {
       <button onClick={createWorkspace}>Create</button>
 
       <hr />
+
+      <h2>Join Workspace</h2>
+
+      <input
+        type="text"
+        placeholder="Workspace ID"
+        value={workspaceId}
+        onChange={(e) => setWorkspaceId(e.target.value)}
+      />
+
+      <button onClick={joinWorkspace}>Join</button>
 
       <h2>Your Workspaces</h2>
 

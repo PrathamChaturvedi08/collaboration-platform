@@ -10,6 +10,8 @@ function WorkspacePage() {
 
   const [content, setContent] = useState("");
 
+  const [workspace, setWorkspace] = useState(null);
+
   const sendMessage = async () => {
     try {
       await api.post(`/messages/${id}`, {
@@ -17,6 +19,16 @@ function WorkspacePage() {
       });
 
       setContent("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchWorkspace = async () => {
+    try {
+      const res = await api.get(`/workspaces/${id}`);
+
+      setWorkspace(res.data);
     } catch (error) {
       console.error(error);
     }
@@ -34,6 +46,7 @@ function WorkspacePage() {
     };
 
     fetchMessages();
+    fetchWorkspace();
 
     socket.emit("join-workspace", id);
 
@@ -48,9 +61,15 @@ function WorkspacePage() {
 
   return (
     <div>
-      <h1>Workspace Chat</h1>
+      <h1>{workspace?.name}</h1>
 
-      <p>Workspace ID: {id}</p>
+      <p>Owner: {workspace?.owner?.name}</p>
+
+      <h3>Members</h3>
+
+      {workspace?.members?.map((member) => (
+        <div key={member._id}>{member.name}</div>
+      ))}
 
       <hr />
 
