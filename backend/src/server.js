@@ -12,6 +12,8 @@ const { initSocket } = require("./socket/socket");
 
 const cors = require("cors");
 
+const documentRoutes = require("./routes/documentRoutes");
+
 dotenv.config();
 
 connectDB();
@@ -33,6 +35,8 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/workspaces", require("./routes/workspaceRoutes"));
 
 app.use("/api/messages", require("./routes/messageRoutes"));
+
+app.use("/api/documents", documentRoutes);
 
 const PORT = process.env.PORT || 5000;
 
