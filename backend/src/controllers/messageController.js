@@ -4,6 +4,12 @@ const { getIO } = require("../socket/socket");
 
 const sendMessage = async (req, res) => {
   try {
+    if (!req.body.content?.trim()) {
+      return res.status(400).json({
+        message: "Message cannot be empty",
+      });
+    }
+
     const workspace = await Workspace.findById(req.params.workspaceId);
 
     if (!workspace) {

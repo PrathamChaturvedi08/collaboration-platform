@@ -3,6 +3,12 @@ const Workspace = require("../models/Workspace");
 
 const createDocument = async (req, res) => {
   try {
+    if (!req.body.title?.trim()) {
+      return res.status(400).json({
+        message: "Document title is required",
+      });
+    }
+
     const workspace = await Workspace.findById(req.body.workspaceId);
 
     if (!workspace) {
@@ -150,6 +156,12 @@ const updateDocument = async (req, res) => {
 
 const renameDocument = async (req, res) => {
   try {
+    if (!req.body.title?.trim()) {
+      return res.status(400).json({
+        message: "Document title is required",
+      });
+    }
+
     const document = await Document.findById(req.params.id);
 
     if (!document) {

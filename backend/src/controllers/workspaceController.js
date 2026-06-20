@@ -2,6 +2,12 @@ const Workspace = require("../models/Workspace");
 
 const createWorkspace = async (req, res) => {
   try {
+    if (!req.body.name?.trim()) {
+      return res.status(400).json({
+        message: "Workspace name is required",
+      });
+    }
+
     const workspace = await Workspace.create({
       name: req.body.name,
 
@@ -124,6 +130,12 @@ const deleteWorkspace = async (req, res) => {
 
 const updateWorkspace = async (req, res) => {
   try {
+    if (!req.body.name?.trim()) {
+      return res.status(400).json({
+        message: "Workspace name is required",
+      });
+    }
+
     const workspace = await Workspace.findById(req.params.id);
 
     if (!workspace) {
