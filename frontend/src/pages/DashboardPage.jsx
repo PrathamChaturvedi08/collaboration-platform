@@ -67,6 +67,32 @@ function DashboardPage() {
     }
   };
 
+  const copyWorkspaceId = async (id) => {
+    try {
+      await navigator.clipboard.writeText(id);
+
+      alert("Workspace ID copied");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const deleteWorkspace = async (id) => {
+    const confirmDelete = window.confirm("Delete this workspace?");
+
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/workspaces/${id}`);
+
+      fetchWorkspaces();
+    } catch (error) {
+      console.error(error);
+
+      alert("Unable to delete workspace");
+    }
+  };
+
   if (!user) {
     return <h2>Loading...</h2>;
   }
@@ -83,15 +109,37 @@ function DashboardPage() {
               Your Workspaces
             </h2>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {workspaces.map((workspace) => (
-                <Link
+                <div
                   key={workspace._id}
-                  to={`/workspace/${workspace._id}`}
-                  className="block rounded-xl px-4 py-3 bg-slate-800 hover:bg-slate-700 transition"
+                  className="rounded-xl bg-slate-800 p-3"
                 >
-                  {workspace.name}
-                </Link>
+                  <Link
+                    to={`/workspace/${workspace._id}`}
+                    className="font-medium block hover:text-indigo-400"
+                  >
+                    {workspace.name}
+                  </Link>
+
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => copyWorkspaceId(workspace._id)}
+                      className="text-xs px-3 py-1 rounded bg-slate-700 hover:bg-slate-600"
+                    >
+                      Copy ID
+                    </button>
+
+                    {workspace.owner?._id === user._id && (
+                      <button
+                        onClick={() => deleteWorkspace(workspace._id)}
+                        className="text-xs px-3 py-1 rounded bg-red-600 hover:bg-red-500"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           </div>

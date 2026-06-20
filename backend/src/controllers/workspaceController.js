@@ -94,7 +94,7 @@ const deleteWorkspace = async (req, res) => {
       });
     }
 
-    if (workspace.owner.toString() !== req.user._id) {
+    if (workspace.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         message: "Only owner can delete workspace",
       });
@@ -122,7 +122,7 @@ const updateWorkspace = async (req, res) => {
       });
     }
 
-    if (workspace.owner.toString() !== req.user._id) {
+    if (workspace.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         message: "Only owner can update workspace",
       });
