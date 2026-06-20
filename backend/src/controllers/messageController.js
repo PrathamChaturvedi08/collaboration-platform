@@ -70,7 +70,71 @@ const getMessages = async (req, res) => {
   }
 };
 
+const updateMessage = async (req, res) => {
+  try {
+    const message = await Message.findById(req.params.id);
+
+    if (!message) {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
+
+    if (message.sender.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Not authorized",
+      });
+    }
+
+    message.content = req.body.content;
+
+    await message.save();
+
+    const updatedMessage = await Message.findById(message._id).populate(
+      "sender",
+      "name email",
+    );
+
+    res.json(updatedMessage);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const deleteMessage = async (req, res) => {
+  try {
+    const message = await Message.findById(req.params.id);
+
+    if (!message) {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
+
+    if (message.sender.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Not authorized",
+      });
+    }
+
+    await message.deleteOne();
+
+    res.json({
+      message: "Message deleted",
+      messageId: req.params.id,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   sendMessage,
   getMessages,
+  updateMessage,
+  deleteMessage,
 };

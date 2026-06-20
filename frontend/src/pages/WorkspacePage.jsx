@@ -20,6 +20,10 @@ function WorkspacePage() {
 
   const [typingUser, setTypingUser] = useState("");
 
+  const [editingMessageId, setEditingMessageId] = useState(null);
+
+  const [editContent, setEditContent] = useState("");
+
   const sendMessage = async () => {
     if (!content.trim()) return;
 
@@ -34,6 +38,48 @@ function WorkspacePage() {
       });
 
       setContent("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateMessage = async (messageId) => {
+    try {
+      const res = await api.put(`/messages/${messageId}`, {
+        content: editContent,
+      });
+
+      setMessages((prev) =>
+        prev.map((msg) => (msg._id === messageId ? res.data : msg)),
+      );
+
+      socket.emit("message-edited", {
+        workspaceId: id,
+        message: res.data,
+      });
+
+      setEditingMessageId(null);
+
+      setEditContent("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const deleteMessage = async (messageId) => {
+    const confirmDelete = window.confirm("Delete this message?");
+
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/messages/${messageId}`);
+
+      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+
+      socket.emit("message-deleted", {
+        workspaceId: id,
+        messageId,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -82,6 +128,18 @@ function WorkspacePage() {
       setMessages((prev) => [...prev, message]);
     });
 
+    socket.on("receive-message-edit", (updatedMessage) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === updatedMessage._id ? updatedMessage : msg,
+        ),
+      );
+    });
+
+    socket.on("receive-message-delete", (messageId) => {
+      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+    });
+
     socket.on("online-users", (users) => {
       setOnlineUsers(users);
     });
@@ -96,6 +154,8 @@ function WorkspacePage() {
 
     return () => {
       socket.off("new-message");
+      socket.off("receive-message-edit");
+      socket.off("receive-message-delete");
       socket.off("online-users");
       socket.off("user-typing");
     };
@@ -211,7 +271,58 @@ function WorkspacePage() {
                         isMine ? "bg-indigo-600" : "bg-slate-800"
                       }`}
                     >
-                      <div>{message.content}</div>
+                      {editingMessageId === message._id ? (
+                        <div className="space-y-2">
+                          <input
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            className="w-full rounded bg-slate-900 px-2 py-1"
+                          />
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => updateMessage(message._id)}
+                              className="text-xs bg-green-600 px-2 py-1 rounded"
+                            >
+                              Save
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setEditingMessageId(null);
+                                setEditContent("");
+                              }}
+                              className="text-xs bg-red-600 px-2 py-1 rounded"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>{message.content}</div>
+                      )}
+
+                      {isMine && editingMessageId !== message._id && (
+                        <div className="mt-2 flex gap-3">
+                          <button
+                            onClick={() => {
+                              setEditingMessageId(message._id);
+
+                              setEditContent(message.content);
+                            }}
+                            className="text-xs text-indigo-300 hover:text-indigo-200"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() => deleteMessage(message._id)}
+                            className="text-xs text-red-400 hover:text-red-300"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
 
                       <div className="mt-2 text-xs opacity-70">
                         {new Date(message.createdAt).toLocaleTimeString([], {

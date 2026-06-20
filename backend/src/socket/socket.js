@@ -40,6 +40,14 @@ const initSocket = (server) => {
       socket.to(documentId).emit("receive-document-change", content);
     });
 
+    socket.on("message-edited", ({ workspaceId, message }) => {
+      socket.to(workspaceId).emit("receive-message-edit", message);
+    });
+
+    socket.on("message-deleted", ({ workspaceId, messageId }) => {
+      socket.to(workspaceId).emit("receive-message-delete", messageId);
+    });
+
     socket.on("disconnect", () => {
       onlineUsers.delete(socket.id);
 
