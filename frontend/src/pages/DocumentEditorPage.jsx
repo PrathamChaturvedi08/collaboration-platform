@@ -67,6 +67,10 @@ function DocumentEditorPage() {
     };
 
     initialize();
+
+    return () => {
+      socket.emit("leave-document", id);
+    };
   }, [id]);
 
   useEffect(() => {

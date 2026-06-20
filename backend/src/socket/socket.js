@@ -45,6 +45,18 @@ const initSocket = (server) => {
       console.log(`Socket ${socket.id} joined document ${documentId}`);
     });
 
+    socket.on("leave-document", (documentId) => {
+      if (!documentEditors[documentId]) return;
+
+      documentEditors[documentId] = documentEditors[documentId].filter(
+        (editor) => editor.socketId !== socket.id,
+      );
+
+      io.to(documentId).emit("active-editors", documentEditors[documentId]);
+
+      socket.leave(documentId);
+    });
+
     socket.on("typing", ({ workspaceId, user }) => {
       socket.to(workspaceId).emit("user-typing", user);
     });
