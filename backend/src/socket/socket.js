@@ -4,6 +4,8 @@ let io;
 
 const onlineUsers = new Map();
 
+const documentEditors = {};
+
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
@@ -20,10 +22,27 @@ const initSocket = (server) => {
       io.emit("online-users", Array.from(onlineUsers.values()));
     });
 
-    socket.on("join-workspace", (workspaceId) => {
-      socket.join(workspaceId);
+    socket.on("join-document", ({ documentId, user }) => {
+      socket.join(documentId);
 
-      console.log(`Socket ${socket.id} joined workspace ${workspaceId}`);
+      if (!documentEditors[documentId]) {
+        documentEditors[documentId] = [];
+      }
+
+      const exists = documentEditors[documentId].find(
+        (editor) => editor._id === user._id,
+      );
+
+      if (!exists) {
+        documentEditors[documentId].push({
+          ...user,
+          socketId: socket.id,
+        });
+      }
+
+      io.to(documentId).emit("active-editors", documentEditors[documentId]);
+
+      console.log(`Socket ${socket.id} joined document ${documentId}`);
     });
 
     socket.on("typing", ({ workspaceId, user }) => {
@@ -49,6 +68,14 @@ const initSocket = (server) => {
     });
 
     socket.on("disconnect", () => {
+      for (const documentId in documentEditors) {
+        documentEditors[documentId] = documentEditors[documentId].filter(
+          (editor) => editor.socketId !== socket.id,
+        );
+
+        io.to(documentId).emit("active-editors", documentEditors[documentId]);
+      }
+
       onlineUsers.delete(socket.id);
 
       io.emit("online-users", Array.from(onlineUsers.values()));

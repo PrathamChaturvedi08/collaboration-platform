@@ -10,6 +10,10 @@ function DocumentEditorPage() {
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [activeEditors, setActiveEditors] = useState([]);
+
+  const [currentUser, setCurrentUser] = useState(null);
+
   const fetchDocument = async () => {
     try {
       const res = await api.get(`/documents/${id}`);
@@ -38,10 +42,31 @@ function DocumentEditorPage() {
     }
   };
 
-  useEffect(() => {
-    fetchDocument();
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await api.get("/auth/me");
 
-    socket.emit("join-document", id);
+      setCurrentUser(res.data.user);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    const initialize = async () => {
+      await fetchDocument();
+
+      const res = await api.get("/auth/me");
+
+      setCurrentUser(res.data.user);
+
+      socket.emit("join-document", {
+        documentId: id,
+        user: res.data.user,
+      });
+    };
+
+    initialize();
   }, [id]);
 
   useEffect(() => {
@@ -59,8 +84,13 @@ function DocumentEditorPage() {
       setContent(newContent);
     });
 
+    socket.on("active-editors", (editors) => {
+      setActiveEditors(editors);
+    });
+
     return () => {
       socket.off("receive-document-change");
+      socket.off("active-editors");
     };
   }, []);
 
@@ -92,6 +122,17 @@ function DocumentEditorPage() {
       <p className="text-sm text-slate-400 mt-2">
         {saving ? "Saving..." : "Saved"}
       </p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {activeEditors.map((editor) => (
+          <div
+            key={editor.socketId}
+            className="bg-emerald-700 px-3 py-1 rounded-full text-sm"
+          >
+            🟢 {editor.name}
+          </div>
+        ))}
+      </div>
 
       <div className="mt-6">
         <textarea
