@@ -108,10 +108,21 @@ function WorkspacePage() {
 
         <h1 className="text-3xl font-bold">{workspace?.name}</h1>
 
-        <div className="mt-2 flex gap-6 text-slate-400 text-sm">
-          <span>Owner: {workspace?.owner?.name}</span>
+        <div className="mt-2 flex items-center gap-6 flex-wrap">
+          <span className="text-slate-400 text-sm">
+            Owner: {workspace?.owner?.name}
+          </span>
 
-          <span>Members: {workspace?.members?.length}</span>
+          <span className="text-slate-400 text-sm">
+            Members: {workspace?.members?.length}
+          </span>
+
+          <Link
+            to={`/workspace/${id}/documents`}
+            className="bg-indigo-600 px-4 py-2 rounded-lg text-white hover:bg-indigo-500 transition"
+          >
+            Documents
+          </Link>
         </div>
       </div>
 

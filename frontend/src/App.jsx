@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import DocumentsPage from "./pages/DocumentsPage";
+import DocumentEditorPage from "./pages/DocumentEditorPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -29,6 +31,24 @@ function App() {
           element={
             <ProtectedRoute>
               <WorkspacePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/workspace/:id/documents"
+          element={
+            <ProtectedRoute>
+              <DocumentsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/documents/:id"
+          element={
+            <ProtectedRoute>
+              <DocumentEditorPage />
             </ProtectedRoute>
           }
         />
