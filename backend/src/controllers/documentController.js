@@ -1,4 +1,5 @@
 const Document = require("../models/Document");
+const Workspace = require("../models/Workspace");
 
 const createDocument = async (req, res) => {
   try {
@@ -85,6 +86,14 @@ const renameDocument = async (req, res) => {
       });
     }
 
+    const workspace = await Workspace.findById(document.workspace);
+
+    if (workspace.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Only workspace owner can rename documents",
+      });
+    }
+
     document.title = req.body.title;
 
     await document.save();
@@ -104,6 +113,14 @@ const deleteDocument = async (req, res) => {
     if (!document) {
       return res.status(404).json({
         message: "Document not found",
+      });
+    }
+
+    const workspace = await Workspace.findById(document.workspace);
+
+    if (workspace.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Only workspace owner can delete documents",
       });
     }
 

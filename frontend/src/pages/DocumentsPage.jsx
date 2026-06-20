@@ -8,9 +8,13 @@ function DocumentsPage() {
   const [documents, setDocuments] = useState([]);
   const [title, setTitle] = useState("");
 
+  const [currentUser, setCurrentUser] = useState(null);
+
   const [editingDocumentId, setEditingDocumentId] = useState(null);
 
   const [newTitle, setNewTitle] = useState("");
+
+  const [workspace, setWorkspace] = useState(null);
 
   const fetchDocuments = async () => {
     try {
@@ -22,8 +26,30 @@ function DocumentsPage() {
     }
   };
 
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await api.get("/auth/me");
+
+      setCurrentUser(res.data.user);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchWorkspace = async () => {
+    try {
+      const res = await api.get(`/workspaces/${id}`);
+
+      setWorkspace(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchDocuments();
+    fetchCurrentUser();
+    fetchWorkspace();
   }, []);
 
   const createDocument = async () => {
@@ -144,23 +170,27 @@ function DocumentsPage() {
                       Open
                     </Link>
 
-                    <button
-                      onClick={() => {
-                        setEditingDocumentId(document._id);
+                    {workspace?.owner?._id === currentUser?._id && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingDocumentId(document._id);
 
-                        setNewTitle(document.title);
-                      }}
-                      className="bg-slate-700 px-4 py-2 rounded-lg"
-                    >
-                      Rename
-                    </button>
+                            setNewTitle(document.title);
+                          }}
+                          className="bg-slate-700 px-4 py-2 rounded-lg"
+                        >
+                          Rename
+                        </button>
 
-                    <button
-                      onClick={() => deleteDocument(document._id)}
-                      className="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-500"
-                    >
-                      Delete
-                    </button>
+                        <button
+                          onClick={() => deleteDocument(document._id)}
+                          className="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-500"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
                   </div>
                 </>
               )}
