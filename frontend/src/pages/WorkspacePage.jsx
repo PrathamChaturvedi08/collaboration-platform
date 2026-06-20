@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 import socket from "../services/socket";
 import toast from "react-hot-toast";
+import LoadingScreen from "../components/LoadingScreen";
 
 function WorkspacePage() {
   const { id } = useParams();
@@ -177,11 +178,7 @@ function WorkspacePage() {
   }, [messages]);
 
   if (!workspace) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
-        Loading...
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (

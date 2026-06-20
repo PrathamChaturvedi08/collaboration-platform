@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 import socket from "../services/socket";
+import LoadingScreen from "../components/LoadingScreen";
 
 function DocumentEditorPage() {
   const { id } = useParams();
@@ -85,11 +86,7 @@ function DocumentEditorPage() {
   }, []);
 
   if (!document) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
-        Loading...
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import LoadingScreen from "../components/LoadingScreen";
 
 function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -105,7 +106,7 @@ function DashboardPage() {
   };
 
   if (!user) {
-    return <h2>Loading...</h2>;
+    return <LoadingScreen />;
   }
 
   return (
@@ -115,43 +116,47 @@ function DashboardPage() {
         <div className="w-72 border-r border-slate-800 bg-slate-900 p-6 flex flex-col">
           <h1 className="text-3xl font-bold mb-8">CollabSpace</h1>
 
-          <div className="flex-1">
+          <div className="flex-1 overflow-y-auto pr-2">
             <h2 className="text-sm uppercase tracking-wider text-slate-400 mb-4">
               Your Workspaces
             </h2>
 
             <div className="space-y-3">
-              {workspaces.map((workspace) => (
-                <div
-                  key={workspace._id}
-                  className="rounded-xl bg-slate-800 p-3"
-                >
-                  <Link
-                    to={`/workspace/${workspace._id}`}
-                    className="font-medium block hover:text-indigo-400"
+              {workspaces.length === 0 ? (
+                <p className="text-slate-500 text-sm">No workspaces yet</p>
+              ) : (
+                workspaces.map((workspace) => (
+                  <div
+                    key={workspace._id}
+                    className="rounded-xl bg-slate-800 p-3"
                   >
-                    {workspace.name}
-                  </Link>
-
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      onClick={() => copyWorkspaceId(workspace._id)}
-                      className="text-xs px-3 py-1 rounded bg-slate-700 hover:bg-slate-600"
+                    <Link
+                      to={`/workspace/${workspace._id}`}
+                      className="font-medium block hover:text-indigo-400"
                     >
-                      Copy ID
-                    </button>
+                      {workspace.name}
+                    </Link>
 
-                    {workspace.owner?._id === user._id && (
+                    <div className="mt-3 flex gap-2">
                       <button
-                        onClick={() => deleteWorkspace(workspace._id)}
-                        className="text-xs px-3 py-1 rounded bg-red-600 hover:bg-red-500"
+                        onClick={() => copyWorkspaceId(workspace._id)}
+                        className="text-xs px-3 py-1 rounded bg-slate-700 hover:bg-slate-600"
                       >
-                        Delete
+                        Copy ID
                       </button>
-                    )}
+
+                      {workspace.owner?._id === user._id && (
+                        <button
+                          onClick={() => deleteWorkspace(workspace._id)}
+                          className="text-xs px-3 py-1 rounded bg-red-600 hover:bg-red-500"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
