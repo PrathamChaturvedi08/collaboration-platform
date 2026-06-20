@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 
 function LoginPage() {
@@ -33,32 +33,49 @@ function LoginPage() {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
+        <h1 className="text-4xl font-bold text-white text-center">
+          CollabSpace
+        </h1>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-        />
+        <p className="text-slate-400 text-center mt-2">Welcome back 👋</p>
 
-        <br />
-        <br />
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            onChange={handleChange}
+            className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none focus:border-indigo-500"
+          />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-        />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            onChange={handleChange}
+            className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none focus:border-indigo-500"
+          />
 
-        <br />
-        <br />
+          <button
+            type="submit"
+            className="w-full rounded-xl bg-indigo-600 py-3 font-medium text-white hover:bg-indigo-500 transition"
+          >
+            Sign In
+          </button>
+        </form>
 
-        <button type="submit">Login</button>
-      </form>
+        <p className="text-center text-slate-400 mt-6">
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            className="text-indigo-400 hover:text-indigo-300"
+          >
+            Register
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
