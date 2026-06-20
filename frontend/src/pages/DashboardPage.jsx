@@ -72,46 +72,95 @@ function DashboardPage() {
   }
 
   return (
-    <div>
-      <h1>Welcome, {user.name}</h1>
+    <div className="min-h-screen bg-slate-950 text-white">
+      <div className="flex min-h-screen">
+        {/* Sidebar */}
+        <div className="w-72 border-r border-slate-800 bg-slate-900 p-6 flex flex-col">
+          <h1 className="text-3xl font-bold mb-8">CollabSpace</h1>
 
-      <p>{user.email}</p>
+          <div className="flex-1">
+            <h2 className="text-sm uppercase tracking-wider text-slate-400 mb-4">
+              Your Workspaces
+            </h2>
 
-      <button onClick={logout}>Logout</button>
+            <div className="space-y-2">
+              {workspaces.map((workspace) => (
+                <Link
+                  key={workspace._id}
+                  to={`/workspace/${workspace._id}`}
+                  className="block rounded-xl px-4 py-3 bg-slate-800 hover:bg-slate-700 transition"
+                >
+                  {workspace.name}
+                </Link>
+              ))}
+            </div>
+          </div>
 
-      <hr />
+          <div className="border-t border-slate-800 pt-4 mt-6">
+            <div className="font-semibold">{user.name}</div>
 
-      <h2>Create Workspace</h2>
+            <div className="text-sm text-slate-400">{user.email}</div>
 
-      <input
-        type="text"
-        placeholder="Workspace Name"
-        value={workspaceName}
-        onChange={(e) => setWorkspaceName(e.target.value)}
-      />
-
-      <button onClick={createWorkspace}>Create</button>
-
-      <hr />
-
-      <h2>Join Workspace</h2>
-
-      <input
-        type="text"
-        placeholder="Workspace ID"
-        value={workspaceId}
-        onChange={(e) => setWorkspaceId(e.target.value)}
-      />
-
-      <button onClick={joinWorkspace}>Join</button>
-
-      <h2>Your Workspaces</h2>
-
-      {workspaces.map((workspace) => (
-        <div key={workspace._id}>
-          <Link to={`/workspace/${workspace._id}`}>{workspace.name}</Link>
+            <button
+              onClick={logout}
+              className="mt-4 w-full rounded-xl bg-red-600 py-2 hover:bg-red-500 transition"
+            >
+              Logout
+            </button>
+          </div>
         </div>
-      ))}
+
+        {/* Main Content */}
+        <div className="flex-1 p-10">
+          <h1 className="text-4xl font-bold mb-2">Welcome back, {user.name}</h1>
+
+          <p className="text-slate-400 mb-10">
+            Manage your workspaces and collaborate in real time.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Create Workspace */}
+            <div className="rounded-3xl bg-slate-900 border border-slate-800 p-6">
+              <h2 className="text-2xl font-semibold mb-4">Create Workspace</h2>
+
+              <input
+                type="text"
+                placeholder="Workspace Name"
+                value={workspaceName}
+                onChange={(e) => setWorkspaceName(e.target.value)}
+                className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none"
+              />
+
+              <button
+                onClick={createWorkspace}
+                className="mt-4 w-full rounded-xl bg-indigo-600 py-3 font-medium hover:bg-indigo-500 transition"
+              >
+                Create Workspace
+              </button>
+            </div>
+
+            {/* Join Workspace */}
+            <div className="rounded-3xl bg-slate-900 border border-slate-800 p-6">
+              <h2 className="text-2xl font-semibold mb-4">Join Workspace</h2>
+
+              <input
+                type="text"
+                placeholder="Workspace ID"
+                value={workspaceId}
+                onChange={(e) => setWorkspaceId(e.target.value)}
+                className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none"
+              />
+
+              <button
+                onClick={joinWorkspace}
+                className="mt-4 w-full rounded-xl bg-emerald-600 py-3 font-medium hover:bg-emerald-500 transition"
+              >
+                Join Workspace
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
