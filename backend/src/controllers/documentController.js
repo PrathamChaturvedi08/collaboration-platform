@@ -75,9 +75,55 @@ const updateDocument = async (req, res) => {
   }
 };
 
+const renameDocument = async (req, res) => {
+  try {
+    const document = await Document.findById(req.params.id);
+
+    if (!document) {
+      return res.status(404).json({
+        message: "Document not found",
+      });
+    }
+
+    document.title = req.body.title;
+
+    await document.save();
+
+    res.json(document);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const deleteDocument = async (req, res) => {
+  try {
+    const document = await Document.findById(req.params.id);
+
+    if (!document) {
+      return res.status(404).json({
+        message: "Document not found",
+      });
+    }
+
+    await document.deleteOne();
+
+    res.json({
+      message: "Document deleted",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createDocument,
   getDocuments,
   getDocumentById,
   updateDocument,
+  renameDocument,
+  deleteDocument,
 };

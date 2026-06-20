@@ -8,6 +8,10 @@ function DocumentsPage() {
   const [documents, setDocuments] = useState([]);
   const [title, setTitle] = useState("");
 
+  const [editingDocumentId, setEditingDocumentId] = useState(null);
+
+  const [newTitle, setNewTitle] = useState("");
+
   const fetchDocuments = async () => {
     try {
       const res = await api.get(`/documents/workspace/${id}`);
@@ -32,6 +36,36 @@ function DocumentsPage() {
       });
 
       setTitle("");
+
+      fetchDocuments();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const renameDocument = async (documentId) => {
+    try {
+      await api.put(`/documents/${documentId}/rename`, {
+        title: newTitle,
+      });
+
+      setEditingDocumentId(null);
+
+      setNewTitle("");
+
+      fetchDocuments();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const deleteDocument = async (documentId) => {
+    const confirmDelete = window.confirm("Delete this document?");
+
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/documents/${documentId}`);
 
       fetchDocuments();
     } catch (error) {
@@ -65,19 +99,74 @@ function DocumentsPage() {
       </div>
 
       <div className="mt-8 space-y-4">
-        {documents.map((document) => (
-          <Link
-            key={document._id}
-            to={`/documents/${document._id}`}
-            className="block bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-indigo-500"
-          >
-            <h3 className="font-semibold">{document.title}</h3>
+        {documents.length === 0 ? (
+          <div className="text-center text-slate-500 py-12">
+            No documents yet
+          </div>
+        ) : (
+          documents.map((document) => (
+            <div
+              key={document._id}
+              className="bg-slate-900 border border-slate-800 rounded-xl p-5"
+            >
+              {editingDocumentId === document._id ? (
+                <div className="flex gap-2">
+                  <input
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    className="flex-1 rounded bg-slate-800 px-3 py-2"
+                  />
 
-            <p className="text-sm text-slate-400">
-              Created by {document.createdBy?.name}
-            </p>
-          </Link>
-        ))}
+                  <button
+                    onClick={() => renameDocument(document._id)}
+                    className="bg-green-600 px-3 rounded"
+                  >
+                    Save
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <h3 className="font-semibold text-lg">{document.title}</h3>
+
+                  <p className="text-sm text-slate-400 mt-1">
+                    Created by {document.createdBy?.name}
+                  </p>
+
+                  <p className="text-xs text-slate-500 mt-2">
+                    Updated {new Date(document.updatedAt).toLocaleString()}
+                  </p>
+
+                  <div className="flex gap-3 mt-4">
+                    <Link
+                      to={`/documents/${document._id}`}
+                      className="bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-500"
+                    >
+                      Open
+                    </Link>
+
+                    <button
+                      onClick={() => {
+                        setEditingDocumentId(document._id);
+
+                        setNewTitle(document.title);
+                      }}
+                      className="bg-slate-700 px-4 py-2 rounded-lg"
+                    >
+                      Rename
+                    </button>
+
+                    <button
+                      onClick={() => deleteDocument(document._id)}
+                      className="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-500"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
