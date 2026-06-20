@@ -3,6 +3,24 @@ const Workspace = require("../models/Workspace");
 
 const createDocument = async (req, res) => {
   try {
+    const workspace = await Workspace.findById(req.body.workspaceId);
+
+    if (!workspace) {
+      return res.status(404).json({
+        message: "Workspace not found",
+      });
+    }
+
+    const isMember = workspace.members.some(
+      (member) => member.toString() === req.user._id.toString(),
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        message: "Not a workspace member",
+      });
+    }
+
     const document = await Document.create({
       title: req.body.title,
       workspace: req.body.workspaceId,
@@ -19,6 +37,24 @@ const createDocument = async (req, res) => {
 
 const getDocuments = async (req, res) => {
   try {
+    const workspace = await Workspace.findById(req.params.workspaceId);
+
+    if (!workspace) {
+      return res.status(404).json({
+        message: "Workspace not found",
+      });
+    }
+
+    const isMember = workspace.members.some(
+      (member) => member.toString() === req.user._id.toString(),
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        message: "Not a workspace member",
+      });
+    }
+
     const documents = await Document.find({
       workspace: req.params.workspaceId,
     })
@@ -46,6 +82,24 @@ const getDocumentById = async (req, res) => {
       });
     }
 
+    const workspace = await Workspace.findById(document.workspace);
+
+    if (!workspace) {
+      return res.status(404).json({
+        message: "Workspace not found",
+      });
+    }
+
+    const isMember = workspace.members.some(
+      (member) => member.toString() === req.user._id.toString(),
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        message: "Not a workspace member",
+      });
+    }
+
     res.json(document);
   } catch (error) {
     res.status(500).json({
@@ -61,6 +115,24 @@ const updateDocument = async (req, res) => {
     if (!document) {
       return res.status(404).json({
         message: "Document not found",
+      });
+    }
+
+    const workspace = await Workspace.findById(document.workspace);
+
+    if (!workspace) {
+      return res.status(404).json({
+        message: "Workspace not found",
+      });
+    }
+
+    const isMember = workspace.members.some(
+      (member) => member.toString() === req.user._id.toString(),
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        message: "Not a workspace member",
       });
     }
 
@@ -87,6 +159,12 @@ const renameDocument = async (req, res) => {
     }
 
     const workspace = await Workspace.findById(document.workspace);
+
+    if (!workspace) {
+      return res.status(404).json({
+        message: "Workspace not found",
+      });
+    }
 
     if (workspace.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({
@@ -117,6 +195,12 @@ const deleteDocument = async (req, res) => {
     }
 
     const workspace = await Workspace.findById(document.workspace);
+
+    if (!workspace) {
+      return res.status(404).json({
+        message: "Workspace not found",
+      });
+    }
 
     if (workspace.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({
