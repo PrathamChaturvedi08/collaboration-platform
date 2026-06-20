@@ -46,6 +46,16 @@ const getWorkspaceById = async (req, res) => {
       });
     }
 
+    const isMember = workspace.members.some(
+      (member) => member._id.toString() === req.user._id.toString(),
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        message: "Not a workspace member",
+      });
+    }
+
     res.json(workspace);
   } catch (error) {
     res.status(500).json({
