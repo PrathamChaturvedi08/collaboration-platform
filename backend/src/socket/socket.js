@@ -18,6 +18,16 @@ const initSocket = (server) => {
       console.log(`Socket ${socket.id} joined workspace ${workspaceId}`);
     });
 
+    socket.on("join-document", (documentId) => {
+      socket.join(documentId);
+
+      console.log(`Socket ${socket.id} joined document ${documentId}`);
+    });
+
+    socket.on("document-change", ({ documentId, content }) => {
+      socket.to(documentId).emit("receive-document-change", content);
+    });
+
     socket.on("disconnect", () => {
       console.log("User Disconnected:", socket.id);
     });

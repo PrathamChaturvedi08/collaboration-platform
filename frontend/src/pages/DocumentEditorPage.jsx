@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
+import socket from "../services/socket";
 
 function DocumentEditorPage() {
   const { id } = useParams();
@@ -39,6 +40,8 @@ function DocumentEditorPage() {
 
   useEffect(() => {
     fetchDocument();
+
+    socket.emit("join-document", id);
   }, [id]);
 
   useEffect(() => {
@@ -50,6 +53,16 @@ function DocumentEditorPage() {
 
     return () => clearTimeout(timeout);
   }, [content]);
+
+  useEffect(() => {
+    socket.on("receive-document-change", (newContent) => {
+      setContent(newContent);
+    });
+
+    return () => {
+      socket.off("receive-document-change");
+    };
+  }, []);
 
   if (!document) {
     return (
@@ -77,7 +90,14 @@ function DocumentEditorPage() {
       <div className="mt-6">
         <textarea
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => {
+            setContent(e.target.value);
+
+            socket.emit("document-change", {
+              documentId: id,
+              content: e.target.value,
+            });
+          }}
           className="w-full h-[500px] rounded-xl bg-slate-900 border border-slate-800 p-4 outline-none"
         />
       </div>
