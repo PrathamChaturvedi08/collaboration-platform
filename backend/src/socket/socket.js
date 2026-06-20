@@ -49,12 +49,6 @@ const initSocket = (server) => {
       socket.to(workspaceId).emit("user-typing", user);
     });
 
-    socket.on("join-document", (documentId) => {
-      socket.join(documentId);
-
-      console.log(`Socket ${socket.id} joined document ${documentId}`);
-    });
-
     socket.on("document-change", ({ documentId, content }) => {
       socket.to(documentId).emit("receive-document-change", content);
     });
