@@ -83,6 +83,12 @@ function DocumentEditorPage() {
 
       <h1 className="text-4xl font-bold mt-4">{document.title}</h1>
 
+      <div className="mt-3 text-slate-400 space-y-1">
+        <p>Created By: {document.createdBy?.name}</p>
+
+        <p>Last Updated: {new Date(document.updatedAt).toLocaleString()}</p>
+      </div>
+
       <p className="text-sm text-slate-400 mt-2">
         {saving ? "Saving..." : "Saved"}
       </p>

@@ -16,6 +16,10 @@ function WorkspacePage() {
 
   const [currentUser, setCurrentUser] = useState(null);
 
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
+  const [typingUser, setTypingUser] = useState("");
+
   const sendMessage = async () => {
     if (!content.trim()) return;
 
@@ -50,6 +54,8 @@ function WorkspacePage() {
       const res = await api.get("/auth/me");
 
       setCurrentUser(res.data.user);
+
+      socket.emit("user-online", res.data.user._id);
     } catch (error) {
       console.error(error);
     }
@@ -76,8 +82,22 @@ function WorkspacePage() {
       setMessages((prev) => [...prev, message]);
     });
 
+    socket.on("online-users", (users) => {
+      setOnlineUsers(users);
+    });
+
+    socket.on("user-typing", (user) => {
+      setTypingUser(user);
+
+      setTimeout(() => {
+        setTypingUser("");
+      }, 1500);
+    });
+
     return () => {
       socket.off("new-message");
+      socket.off("online-users");
+      socket.off("user-typing");
     };
   }, [id]);
 
@@ -131,8 +151,16 @@ function WorkspacePage() {
         {workspace?.members?.map((member) => (
           <div
             key={member._id}
-            className="bg-slate-800 border border-slate-700 px-4 py-2 rounded-full text-sm hover:bg-slate-700 transition"
+            className="bg-slate-800 border border-slate-700 px-4 py-2 rounded-full text-sm hover:bg-slate-700 transition flex items-center gap-2"
           >
+            <div
+              className={`h-2.5 w-2.5 rounded-full ${
+                onlineUsers.includes(member._id)
+                  ? "bg-green-500"
+                  : "bg-slate-500"
+              }`}
+            />
+
             {member.name}
           </div>
         ))}
@@ -202,6 +230,12 @@ function WorkspacePage() {
         <div ref={messagesEndRef}></div>
       </div>
 
+      {typingUser && (
+        <div className="px-6 py-2 text-sm text-slate-400 italic">
+          {typingUser} is typing...
+        </div>
+      )}
+
       {/* Message Input */}
       <div className="border-t border-slate-800 bg-slate-900 p-5">
         <div className="flex gap-3">
@@ -209,7 +243,14 @@ function WorkspacePage() {
             type="text"
             placeholder="Message the workspace..."
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+
+              socket.emit("typing", {
+                workspaceId: id,
+                user: currentUser?.name,
+              });
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 sendMessage();
