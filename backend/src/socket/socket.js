@@ -22,6 +22,12 @@ const initSocket = (server) => {
       io.emit("online-users", Array.from(onlineUsers.values()));
     });
 
+    socket.on("join-workspace", (workspaceId) => {
+      socket.join(workspaceId);
+
+      console.log(`Socket ${socket.id} joined workspace ${workspaceId}`);
+    });
+
     socket.on("join-document", ({ documentId, user }) => {
       socket.join(documentId);
 

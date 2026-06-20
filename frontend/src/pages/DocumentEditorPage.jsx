@@ -12,8 +12,6 @@ function DocumentEditorPage() {
 
   const [activeEditors, setActiveEditors] = useState([]);
 
-  const [currentUser, setCurrentUser] = useState(null);
-
   const fetchDocument = async () => {
     try {
       const res = await api.get(`/documents/${id}`);
@@ -42,23 +40,11 @@ function DocumentEditorPage() {
     }
   };
 
-  const fetchCurrentUser = async () => {
-    try {
-      const res = await api.get("/auth/me");
-
-      setCurrentUser(res.data.user);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   useEffect(() => {
     const initialize = async () => {
       await fetchDocument();
 
       const res = await api.get("/auth/me");
-
-      setCurrentUser(res.data.user);
 
       socket.emit("join-document", {
         documentId: id,

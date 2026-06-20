@@ -12,6 +12,8 @@ function RegisterPage() {
     password: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -23,14 +25,20 @@ function RegisterPage() {
     e.preventDefault();
 
     try {
+      setLoading(true);
+
       const res = await api.post("/auth/register", formData);
 
       localStorage.setItem("token", res.data.token);
 
       toast.success("Account created!");
 
+      setLoading(false);
+
       navigate("/");
     } catch (error) {
+      setLoading(false);
+
       console.error(error);
 
       toast.error(error.response?.data?.message || "Registration failed");
@@ -40,12 +48,13 @@ function RegisterPage() {
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
+        <div className="text-6xl text-center mb-4">🚀</div>
         <h1 className="text-4xl font-bold text-white text-center">
           CollabSpace
         </h1>
 
         <p className="text-slate-400 text-center mt-2">
-          Create your account 🚀
+          Create a workspace and start collaborating
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -75,9 +84,10 @@ function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-indigo-600 py-3 font-medium text-white hover:bg-indigo-500 transition"
+            disabled={loading}
+            className="w-full rounded-xl bg-indigo-600 py-3 font-medium text-white hover:bg-indigo-500 transition disabled:opacity-50"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 

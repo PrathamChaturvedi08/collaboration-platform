@@ -11,6 +11,8 @@ function LoginPage() {
     password: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -22,14 +24,20 @@ function LoginPage() {
     e.preventDefault();
 
     try {
+      setLoading(true);
+
       const res = await api.post("/auth/login", formData);
 
       localStorage.setItem("token", res.data.token);
 
       toast.success("Welcome back!");
 
+      setLoading(false);
+
       navigate("/");
     } catch (error) {
+      setLoading(false);
+
       console.error(error);
 
       toast.error(error.response?.data?.message || "Login failed");
@@ -39,11 +47,14 @@ function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
+        <div className="text-6xl text-center mb-4">🚀</div>
         <h1 className="text-4xl font-bold text-white text-center">
           CollabSpace
         </h1>
 
-        <p className="text-slate-400 text-center mt-2">Welcome back 👋</p>
+        <p className="text-slate-400 text-center mt-2">
+          Collaborate with your team in real time
+        </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <input
@@ -64,9 +75,10 @@ function LoginPage() {
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-indigo-600 py-3 font-medium text-white hover:bg-indigo-500 transition"
+            disabled={loading}
+            className="w-full rounded-xl bg-indigo-600 py-3 font-medium text-white hover:bg-indigo-500 transition disabled:opacity-50"
           >
-            Sign In
+            {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
 
