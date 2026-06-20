@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -26,10 +27,13 @@ function RegisterPage() {
 
       localStorage.setItem("token", res.data.token);
 
+      toast.success("Account created!");
+
       navigate("/");
     } catch (error) {
       console.error(error);
-      alert("Registration failed");
+
+      toast.error(error.response?.data?.message || "Registration failed");
     }
   };
 

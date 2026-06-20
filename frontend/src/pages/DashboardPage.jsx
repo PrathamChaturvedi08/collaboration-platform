@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -43,13 +44,17 @@ function DashboardPage() {
         name: workspaceName,
       });
 
-      alert("Workspace created");
+      toast.success("Workspace created");
 
       setWorkspaceName("");
 
       fetchWorkspaces();
     } catch (error) {
       console.error(error);
+
+      toast.error(
+        error.response?.data?.message || "Unable to create workspace",
+      );
     }
   };
 
@@ -57,13 +62,15 @@ function DashboardPage() {
     try {
       await api.post(`/workspaces/${workspaceId}/join`);
 
-      alert("Joined workspace");
+      toast.success("Joined workspace");
 
       setWorkspaceId("");
 
       fetchWorkspaces();
     } catch (error) {
       console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to join workspace");
     }
   };
 
@@ -71,7 +78,7 @@ function DashboardPage() {
     try {
       await navigator.clipboard.writeText(id);
 
-      alert("Workspace ID copied");
+      toast.success("Workspace ID copied");
     } catch (error) {
       console.error(error);
     }
@@ -85,11 +92,15 @@ function DashboardPage() {
     try {
       await api.delete(`/workspaces/${id}`);
 
+      toast.success("Workspace deleted");
+
       fetchWorkspaces();
     } catch (error) {
       console.error(error);
 
-      alert("Unable to delete workspace");
+      toast.error(
+        error.response?.data?.message || "Unable to delete workspace",
+      );
     }
   };
 

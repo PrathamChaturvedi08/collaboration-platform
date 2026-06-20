@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 import socket from "../services/socket";
+import toast from "react-hot-toast";
 
 function WorkspacePage() {
   const { id } = useParams();
@@ -28,7 +29,7 @@ function WorkspacePage() {
     if (!content.trim()) return;
 
     if (content.length > 1000) {
-      alert("Message too long");
+      toast.error("Message too long");
       return;
     }
 
@@ -40,6 +41,8 @@ function WorkspacePage() {
       setContent("");
     } catch (error) {
       console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to send message");
     }
   };
 
@@ -63,6 +66,8 @@ function WorkspacePage() {
       setEditContent("");
     } catch (error) {
       console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to update message");
     }
   };
 
@@ -74,6 +79,8 @@ function WorkspacePage() {
     try {
       await api.delete(`/messages/${messageId}`);
 
+      toast.success("Message deleted");
+
       setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
 
       socket.emit("message-deleted", {
@@ -82,6 +89,8 @@ function WorkspacePage() {
       });
     } catch (error) {
       console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to delete message");
     }
   };
 

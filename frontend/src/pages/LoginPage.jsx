@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -25,10 +26,13 @@ function LoginPage() {
 
       localStorage.setItem("token", res.data.token);
 
+      toast.success("Welcome back!");
+
       navigate("/");
     } catch (error) {
       console.error(error);
-      alert("Login failed");
+
+      toast.error(error.response?.data?.message || "Login failed");
     }
   };
 

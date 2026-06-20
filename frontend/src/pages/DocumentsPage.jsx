@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 function DocumentsPage() {
   const { id } = useParams();
@@ -23,6 +24,8 @@ function DocumentsPage() {
       setDocuments(res.data);
     } catch (error) {
       console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to load documents");
     }
   };
 
@@ -61,11 +64,15 @@ function DocumentsPage() {
         workspaceId: id,
       });
 
+      toast.success("Document created");
+
       setTitle("");
 
       fetchDocuments();
     } catch (error) {
       console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to create document");
     }
   };
 
@@ -75,6 +82,8 @@ function DocumentsPage() {
         title: newTitle,
       });
 
+      toast.success("Document renamed");
+
       setEditingDocumentId(null);
 
       setNewTitle("");
@@ -82,6 +91,8 @@ function DocumentsPage() {
       fetchDocuments();
     } catch (error) {
       console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to rename document");
     }
   };
 
@@ -93,9 +104,13 @@ function DocumentsPage() {
     try {
       await api.delete(`/documents/${documentId}`);
 
+      toast.success("Document deleted");
+
       fetchDocuments();
     } catch (error) {
       console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to delete document");
     }
   };
 
