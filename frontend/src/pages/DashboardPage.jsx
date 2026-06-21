@@ -3,12 +3,15 @@ import api from "../services/api";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import LoadingScreen from "../components/LoadingScreen";
+import ConfirmModal from "../components/ConfirmModal";
 
 function DashboardPage() {
   const [user, setUser] = useState(null);
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaces, setWorkspaces] = useState([]);
   const [workspaceId, setWorkspaceId] = useState("");
+  const [workspaceToDelete, setWorkspaceToDelete] = useState(null);
+
   const logout = () => {
     localStorage.removeItem("token");
     window.location.href = "/login";
@@ -85,15 +88,13 @@ function DashboardPage() {
     }
   };
 
-  const deleteWorkspace = async (id) => {
-    const confirmDelete = window.confirm("Delete this workspace?");
-
-    if (!confirmDelete) return;
-
+  const deleteWorkspace = async () => {
     try {
-      await api.delete(`/workspaces/${id}`);
+      await api.delete(`/workspaces/${workspaceToDelete}`);
 
       toast.success("Workspace deleted");
+
+      setWorkspaceToDelete(null);
 
       fetchWorkspaces();
     } catch (error) {
@@ -147,7 +148,7 @@ function DashboardPage() {
 
                       {workspace.owner?._id === user._id && (
                         <button
-                          onClick={() => deleteWorkspace(workspace._id)}
+                          onClick={() => setWorkspaceToDelete(workspace._id)}
                           className="text-xs px-3 py-1 rounded bg-red-600 hover:bg-red-500"
                         >
                           Delete
@@ -225,6 +226,13 @@ function DashboardPage() {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        isOpen={!!workspaceToDelete}
+        title="Delete Workspace"
+        message="This action cannot be undone."
+        onConfirm={deleteWorkspace}
+        onCancel={() => setWorkspaceToDelete(null)}
+      />
     </div>
   );
 }

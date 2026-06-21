@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
+import ConfirmModal from "../components/ConfirmModal";
 
 function DocumentsPage() {
   const { id } = useParams();
@@ -16,6 +17,8 @@ function DocumentsPage() {
   const [newTitle, setNewTitle] = useState("");
 
   const [workspace, setWorkspace] = useState(null);
+
+  const [documentToDelete, setDocumentToDelete] = useState(null);
 
   const fetchDocuments = async () => {
     try {
@@ -96,15 +99,13 @@ function DocumentsPage() {
     }
   };
 
-  const deleteDocument = async (documentId) => {
-    const confirmDelete = window.confirm("Delete this document?");
-
-    if (!confirmDelete) return;
-
+  const deleteDocument = async () => {
     try {
-      await api.delete(`/documents/${documentId}`);
+      await api.delete(`/documents/${documentToDelete}`);
 
       toast.success("Document deleted");
+
+      setDocumentToDelete(null);
 
       fetchDocuments();
     } catch (error) {
@@ -199,7 +200,7 @@ function DocumentsPage() {
                         </button>
 
                         <button
-                          onClick={() => deleteDocument(document._id)}
+                          onClick={() => setDocumentToDelete(document._id)}
                           className="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-500"
                         >
                           Delete
@@ -213,6 +214,13 @@ function DocumentsPage() {
           ))
         )}
       </div>
+      <ConfirmModal
+        isOpen={!!documentToDelete}
+        title="Delete Document"
+        message="This action cannot be undone."
+        onConfirm={deleteDocument}
+        onCancel={() => setDocumentToDelete(null)}
+      />
     </div>
   );
 }
