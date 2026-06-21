@@ -4,6 +4,7 @@ import api from "../services/api";
 import socket from "../services/socket";
 import toast from "react-hot-toast";
 import LoadingScreen from "../components/LoadingScreen";
+import ConfirmModal from "../components/ConfirmModal";
 
 function WorkspacePage() {
   const { id } = useParams();
@@ -25,6 +26,8 @@ function WorkspacePage() {
   const [editingMessageId, setEditingMessageId] = useState(null);
 
   const [editContent, setEditContent] = useState("");
+
+  const [messageToDelete, setMessageToDelete] = useState(null);
 
   const sendMessage = async () => {
     if (!content.trim()) return;
@@ -72,22 +75,20 @@ function WorkspacePage() {
     }
   };
 
-  const deleteMessage = async (messageId) => {
-    const confirmDelete = window.confirm("Delete this message?");
-
-    if (!confirmDelete) return;
-
+  const deleteMessage = async () => {
     try {
-      await api.delete(`/messages/${messageId}`);
+      await api.delete(`/messages/${messageToDelete}`);
 
       toast.success("Message deleted");
 
-      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+      setMessages((prev) => prev.filter((msg) => msg._id !== messageToDelete));
 
       socket.emit("message-deleted", {
         workspaceId: id,
-        messageId,
+        messageId: messageToDelete,
       });
+
+      setMessageToDelete(null);
     } catch (error) {
       console.error(error);
 
@@ -134,6 +135,10 @@ function WorkspacePage() {
 
     socket.emit("join-workspace", id);
 
+    socket.on("receive-workspace-join", () => {
+      fetchWorkspace();
+    });
+
     socket.on("new-message", (message) => {
       setMessages((prev) => [...prev, message]);
     });
@@ -164,6 +169,7 @@ function WorkspacePage() {
 
     return () => {
       socket.off("new-message");
+      socket.off("receive-workspace-join");
       socket.off("receive-message-edit");
       socket.off("receive-message-delete");
       socket.off("online-users");
@@ -280,8 +286,14 @@ function WorkspacePage() {
                       {editingMessageId === message._id ? (
                         <div className="space-y-2">
                           <input
+                            autoFocus
                             value={editContent}
                             onChange={(e) => setEditContent(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                updateMessage(message._id);
+                              }
+                            }}
                             className="w-full rounded bg-slate-900 px-2 py-1"
                           />
 
@@ -322,7 +334,7 @@ function WorkspacePage() {
                           </button>
 
                           <button
-                            onClick={() => deleteMessage(message._id)}
+                            onClick={() => setMessageToDelete(message._id)}
                             className="text-xs text-red-400 hover:text-red-300"
                           >
                             Delete
@@ -384,6 +396,13 @@ function WorkspacePage() {
           </button>
         </div>
       </div>
+      <ConfirmModal
+        isOpen={!!messageToDelete}
+        title="Delete Message"
+        message="This action cannot be undone."
+        onConfirm={deleteMessage}
+        onCancel={() => setMessageToDelete(null)}
+      />
     </div>
   );
 }

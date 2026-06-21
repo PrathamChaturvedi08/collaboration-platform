@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import LoadingScreen from "../components/LoadingScreen";
 import ConfirmModal from "../components/ConfirmModal";
+import socket from "../services/socket";
 
 function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -66,6 +67,8 @@ function DashboardPage() {
     try {
       await api.post(`/workspaces/${workspaceId}/join`);
 
+      socket.emit("workspace-joined");
+
       toast.success("Joined workspace");
 
       setWorkspaceId("");
@@ -90,7 +93,11 @@ function DashboardPage() {
 
   const deleteWorkspace = async () => {
     try {
-      await api.delete(`/workspaces/${workspaceToDelete}`);
+      const deletedId = workspaceToDelete;
+
+      await api.delete(`/workspaces/${deletedId}`);
+
+      socket.emit("workspace-deleted", deletedId);
 
       toast.success("Workspace deleted");
 
@@ -105,6 +112,21 @@ function DashboardPage() {
       );
     }
   };
+
+  useEffect(() => {
+    socket.on("receive-workspace-delete", () => {
+      fetchWorkspaces();
+    });
+
+    socket.on("receive-workspace-join", () => {
+      fetchWorkspaces();
+    });
+
+    return () => {
+      socket.off("receive-workspace-delete");
+      socket.off("receive-workspace-join");
+    };
+  }, []);
 
   if (!user) {
     return <LoadingScreen />;
@@ -191,6 +213,11 @@ function DashboardPage() {
               <input
                 type="text"
                 placeholder="Workspace Name"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    createWorkspace();
+                  }
+                }}
                 value={workspaceName}
                 onChange={(e) => setWorkspaceName(e.target.value)}
                 className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none"
@@ -211,6 +238,11 @@ function DashboardPage() {
               <input
                 type="text"
                 placeholder="Workspace ID"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    joinWorkspace();
+                  }
+                }}
                 value={workspaceId}
                 onChange={(e) => setWorkspaceId(e.target.value)}
                 className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none"

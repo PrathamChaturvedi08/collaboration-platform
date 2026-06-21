@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import ConfirmModal from "../components/ConfirmModal";
+import socket from "../services/socket";
 
 function DocumentsPage() {
   const { id } = useParams();
@@ -58,13 +59,43 @@ function DocumentsPage() {
     fetchWorkspace();
   }, []);
 
+  useEffect(() => {
+    socket.emit("join-workspace", id);
+
+    socket.on("receive-document-create", () => {
+      fetchDocuments();
+    });
+
+    socket.on("receive-document-rename", () => {
+      fetchDocuments();
+    });
+
+    socket.on("receive-document-delete", () => {
+      fetchDocuments();
+    });
+
+    return () => {
+      socket.off("receive-document-create");
+      socket.off("receive-document-rename");
+      socket.off("receive-document-delete");
+    };
+  }, [id]);
+
   const createDocument = async () => {
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      toast.error("Document title is required");
+      return;
+    }
 
     try {
-      await api.post("/documents", {
+      const res = await api.post("/documents", {
         title,
         workspaceId: id,
+      });
+
+      socket.emit("document-created", {
+        workspaceId: id,
+        document: res.data,
       });
 
       toast.success("Document created");
@@ -80,9 +111,18 @@ function DocumentsPage() {
   };
 
   const renameDocument = async (documentId) => {
+    if (!newTitle.trim()) {
+      toast.error("Document title is required");
+      return;
+    }
     try {
-      await api.put(`/documents/${documentId}/rename`, {
+      const res = await api.put(`/documents/${documentId}/rename`, {
         title: newTitle,
+      });
+
+      socket.emit("document-renamed", {
+        workspaceId: id,
+        document: res.data,
       });
 
       toast.success("Document renamed");
@@ -101,7 +141,14 @@ function DocumentsPage() {
 
   const deleteDocument = async () => {
     try {
+      const deletedId = documentToDelete;
+
       await api.delete(`/documents/${documentToDelete}`);
+
+      socket.emit("document-deleted", {
+        workspaceId: id,
+        documentId: deletedId,
+      });
 
       toast.success("Document deleted");
 
@@ -127,6 +174,11 @@ function DocumentsPage() {
         <input
           type="text"
           placeholder="Document title"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              createDocument();
+            }
+          }}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="flex-1 rounded-xl bg-slate-900 border border-slate-800 px-4 py-3"
@@ -155,6 +207,12 @@ function DocumentsPage() {
                 <div className="flex gap-2">
                   <input
                     value={newTitle}
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        renameDocument(document._id);
+                      }
+                    }}
                     onChange={(e) => setNewTitle(e.target.value)}
                     className="flex-1 rounded bg-slate-800 px-3 py-2"
                   />

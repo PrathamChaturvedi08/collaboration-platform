@@ -65,6 +65,26 @@ const initSocket = (server) => {
       socket.to(documentId).emit("receive-document-change", content);
     });
 
+    socket.on("workspace-joined", () => {
+      socket.broadcast.emit("receive-workspace-join");
+    });
+
+    socket.on("workspace-deleted", (workspaceId) => {
+      socket.broadcast.emit("receive-workspace-delete", workspaceId);
+    });
+
+    socket.on("document-created", ({ workspaceId }) => {
+      socket.to(workspaceId).emit("receive-document-create");
+    });
+
+    socket.on("document-renamed", ({ workspaceId, document }) => {
+      socket.to(workspaceId).emit("receive-document-rename", document);
+    });
+
+    socket.on("document-deleted", ({ workspaceId, documentId }) => {
+      socket.to(workspaceId).emit("receive-document-delete", documentId);
+    });
+
     socket.on("message-edited", ({ workspaceId, message }) => {
       socket.to(workspaceId).emit("receive-message-edit", message);
     });
