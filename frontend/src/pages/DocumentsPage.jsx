@@ -276,6 +276,7 @@ function DocumentsPage() {
         isOpen={!!documentToDelete}
         title="Delete Document"
         message="This action cannot be undone."
+        confirmText="Delete"
         onConfirm={deleteDocument}
         onCancel={() => setDocumentToDelete(null)}
       />

@@ -12,10 +12,16 @@ function DashboardPage() {
   const [workspaces, setWorkspaces] = useState([]);
   const [workspaceId, setWorkspaceId] = useState("");
   const [workspaceToDelete, setWorkspaceToDelete] = useState(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const logout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login";
+
+    toast.success("Logged out successfully");
+
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 500);
   };
 
   const fetchWorkspaces = async () => {
@@ -34,6 +40,8 @@ function DashboardPage() {
         const res = await api.get("/auth/me");
 
         setUser(res.data.user);
+
+        socket.emit("user-online", res.data.user._id);
       } catch (error) {
         console.error(error);
       }
@@ -189,7 +197,7 @@ function DashboardPage() {
             <div className="text-sm text-slate-400">{user.email}</div>
 
             <button
-              onClick={logout}
+              onClick={() => setShowLogoutModal(true)}
               className="mt-4 w-full rounded-xl bg-red-600 py-2 hover:bg-red-500 transition"
             >
               Logout
@@ -256,14 +264,50 @@ function DashboardPage() {
               </button>
             </div>
           </div>
+          <div className="mt-10 rounded-3xl bg-slate-900 border border-slate-800 p-6">
+            <h2 className="text-2xl font-semibold mb-6">Quick Stats</h2>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-slate-800 rounded-2xl p-5">
+                <p className="text-slate-400 text-sm">Total Workspaces</p>
+
+                <p className="text-3xl font-bold mt-2">{workspaces.length}</p>
+              </div>
+
+              <div className="bg-slate-800 rounded-2xl p-5">
+                <p className="text-slate-400 text-sm">Owned</p>
+
+                <p className="text-3xl font-bold mt-2">
+                  {workspaces.filter((w) => w.owner?._id === user._id).length}
+                </p>
+              </div>
+
+              <div className="bg-slate-800 rounded-2xl p-5">
+                <p className="text-slate-400 text-sm">Joined</p>
+
+                <p className="text-3xl font-bold mt-2">
+                  {workspaces.filter((w) => w.owner?._id !== user._id).length}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <ConfirmModal
         isOpen={!!workspaceToDelete}
         title="Delete Workspace"
         message="This action cannot be undone."
+        confirmText="Delete"
         onConfirm={deleteWorkspace}
         onCancel={() => setWorkspaceToDelete(null)}
+      />
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        title="Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        onConfirm={logout}
+        onCancel={() => setShowLogoutModal(false)}
       />
     </div>
   );

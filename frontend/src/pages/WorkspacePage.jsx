@@ -400,6 +400,7 @@ function WorkspacePage() {
         isOpen={!!messageToDelete}
         title="Delete Message"
         message="This action cannot be undone."
+        confirmText="Delete"
         onConfirm={deleteMessage}
         onCancel={() => setMessageToDelete(null)}
       />
