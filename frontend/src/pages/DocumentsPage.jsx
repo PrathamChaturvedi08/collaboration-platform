@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import ConfirmModal from "../components/ConfirmModal";
+import LoadingScreen from "../components/LoadingScreen";
 import socket from "../services/socket";
 
 function DocumentsPage() {
@@ -21,8 +22,12 @@ function DocumentsPage() {
 
   const [documentToDelete, setDocumentToDelete] = useState(null);
 
+  const [loading, setLoading] = useState(true);
+
   const fetchDocuments = async () => {
     try {
+      setLoading(true);
+
       const res = await api.get(`/documents/workspace/${id}`);
 
       setDocuments(res.data);
@@ -30,6 +35,8 @@ function DocumentsPage() {
       console.error(error);
 
       toast.error(error.response?.data?.message || "Unable to load documents");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,6 +168,10 @@ function DocumentsPage() {
       toast.error(error.response?.data?.message || "Unable to delete document");
     }
   };
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-8">
