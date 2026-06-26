@@ -12,11 +12,8 @@ const {
 const { protect } = require("../middleware/authMiddleware");
 
 router.post("/:workspaceId", protect, sendMessage);
-
 router.get("/:workspaceId", protect, getMessages);
-
 router.put("/:id", protect, updateMessage);
-
 router.delete("/:id", protect, deleteMessage);
 
 module.exports = router;
